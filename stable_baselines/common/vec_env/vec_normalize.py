@@ -42,7 +42,10 @@ class VecNormalize(VecEnvWrapper):
         self.old_obs = np.array([])
 
     def __getstate__(self):
-        """State for pickling. Excludes self.venv, as in general VecEnv's may not be pickleable."""
+        """
+        Gets state for pickling.
+
+        Excludes self.venv, as in general VecEnv's may not be pickleable."""
         state = self.__dict__.copy()
         # these attributes are not pickleable
         del state['venv']
@@ -52,12 +55,24 @@ class VecNormalize(VecEnvWrapper):
         return state
 
     def __setstate__(self, state):
-        """Restores pickled state. User must call set_venv() after unpickling before using."""
+        """
+        Restores pickled state.
+
+        User must call set_venv() after unpickling before using.
+
+        :param state: (dict)"""
         self.__dict__.update(state)
         assert 'venv' not in state
         self.venv = None
 
     def set_venv(self, venv):
+        """
+        Sets the vector environment to wrap to venv.
+
+        Also sets attributes derived from this such as `num_env`.
+
+        :param venv: (VecEnv)
+        """
         if self.venv is not None:
             raise ValueError("Trying to set venv of already initialized VecNormalize wrapper.")
         VecEnvWrapper.__init__(self, venv)
@@ -116,6 +131,25 @@ class VecNormalize(VecEnvWrapper):
         self.ret = np.zeros(self.num_envs)
         return self._normalize_observation(obs)
 
+    @staticmethod
+    def load(load_path, venv=None):
+        """
+        Loads a saved VecNormalize object.
+
+        :param load_path: the path to load from.
+        :param venv: the VecEnv to wrap.
+        :return: (VecNormalize)
+        """
+        with open(load_path, "rb") as f:
+            vec_normalize = pickle.load(f)
+        if venv is not None:
+            vec_normalize.set_venv(venv)
+        return vec_normalize
+
+    def save(self, save_path):
+        with open(save_path, "wb") as f:
+            pickle.dump(self, f)
+
     def save_running_average(self, path):
         """
         :param path: (str) path to log dir
@@ -123,8 +157,8 @@ class VecNormalize(VecEnvWrapper):
         .. deprecated:: 2.9.0
             This function will be removed in a future version
         """
-        warnings.warn("Usage of `save_running_average` is deprecated. "
-                      "Please pickle `VecNormalize` instead.", DeprecationWarning)
+        warnings.warn("Usage of `save_running_average` is deprecated. Please "
+                      "use `save` or pickle instead.", DeprecationWarning)
         for rms, name in zip([self.obs_rms, self.ret_rms], ['obs_rms', 'ret_rms']):
             with open("{}/{}.pkl".format(path, name), 'wb') as file_handler:
                 pickle.dump(rms, file_handler)
@@ -136,8 +170,8 @@ class VecNormalize(VecEnvWrapper):
         .. deprecated:: 2.9.0
             This function will be removed in a future version
         """
-        warnings.warn("Usage of `load_running_average` is deprecated. "
-                      "Please pickle and unpickle `VecNormalize` instead.", DeprecationWarning)
+        warnings.warn("Usage of `load_running_average` is deprecated. Please "
+                      "use `load` or pickle instead.", DeprecationWarning)
         for name in ['obs_rms', 'ret_rms']:
             with open("{}/{}.pkl".format(path, name), 'rb') as file_handler:
                 setattr(self, name, pickle.load(file_handler))
