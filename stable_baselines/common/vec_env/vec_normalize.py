@@ -140,15 +140,15 @@ class VecNormalize(VecEnvWrapper):
         :param venv: the VecEnv to wrap.
         :return: (VecNormalize)
         """
-        with open(load_path, "rb") as f:
-            vec_normalize = pickle.load(f)
+        with open(load_path, "rb") as file_handler:
+            vec_normalize = pickle.load(file_handler)
         if venv is not None:
             vec_normalize.set_venv(venv)
         return vec_normalize
 
     def save(self, save_path):
-        with open(save_path, "wb") as f:
-            pickle.dump(self, f)
+        with open(save_path, "wb") as file_handler:
+            pickle.dump(self, file_handler)
 
     def save_running_average(self, path):
         """

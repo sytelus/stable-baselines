@@ -76,13 +76,6 @@ def test_vec_env(tmpdir):
     check_vec_norm_equal(norm_venv, deserialized)
 
 
-def test_serialize(tmpdir):
-    """Test VecNormalize load/save."""
-    env = DummyVecEnv([make_env])
-    norm = VecNormalize(env, norm_obs=True, norm_reward=True, clip_obs=42., clip_reward=21.)
-
-
-
 def test_mpi_runningmeanstd():
     """Test RunningMeanStd object for MPI"""
     return_code = subprocess.call(['mpirun', '--allow-run-as-root', '-np', '2',
