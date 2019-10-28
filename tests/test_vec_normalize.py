@@ -1,4 +1,3 @@
-import os
 import subprocess
 
 import gym
@@ -71,7 +70,7 @@ def test_vec_env(tmpdir):
         assert np.max(np.abs(obs)) <= clip_obs
         assert np.max(np.abs(rew)) <= clip_reward
 
-    path = os.path.join(tmpdir, "vec_normalize")
+    path = str(tmpdir.join("vec_normalize"))
     norm_venv.save(path)
     deserialized = VecNormalize.load(path, venv=orig_venv)
     check_vec_norm_equal(norm_venv, deserialized)
